@@ -3,6 +3,13 @@ import { Question, Evaluation, Region } from "../types";
 
 const apiKey = process.env.API_KEY;
 
+// API 키 로드 상태를 콘솔에 출력하여 디버깅을 돕습니다.
+if (!apiKey) {
+  console.warn("⚠️ API Key가 process.env.API_KEY에 없습니다. Netlify 환경 변수 설정을 확인해주세요.");
+} else {
+  console.log("✅ API Key가 정상적으로 로드되었습니다.");
+}
+
 // Using gemini-3-flash-preview for balanced performance/latency in text/multimodal tasks
 const MODEL_NAME = "gemini-3-flash-preview";
 

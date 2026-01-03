@@ -4,6 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>중등교사 임용 면접 AI 코칭</title>
+    <script>
+      // 브라우저 환경에서 process.env 에러 방지 (Blank Screen 해결)
+      window.process = {
+        env: {
+          NODE_ENV: 'production'
+          // 빌드 도구가 없어도 코드가 멈추지 않도록 빈 객체를 제공합니다.
+          // Netlify에서 빌드 시 환경변수가 주입되면 이 값은 덮어씌워지거나 코드에서 대체됩니다.
+        }
+      };
+
+      // Tailwind CSS CDN 경고 메시지 숨기기 (콘솔을 깨끗하게 유지하여 진짜 에러 확인 용이)
+      if (typeof console !== 'undefined' && console.warn) {
+        const originalWarn = console.warn;
+        console.warn = (...args) => {
+          if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+          originalWarn(...args);
+        };
+      }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -24,5 +43,6 @@
 </head>
   <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
