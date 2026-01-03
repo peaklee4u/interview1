@@ -8,7 +8,7 @@ const apiKey = process.env.API_KEY;
 if (!apiKey) {
   console.warn("⚠️ API Key가 process.env.API_KEY에 없습니다. Netlify 환경 변수 설정을 확인해주세요.");
 } else {
-  console.log("✅ API Key가 정상적으로 로드되었습니다.");
+  console.log("✅ API Key가 로드되었습니다. (Length: " + apiKey.length + ")");
 }
 
 // Using gemini-3-flash-preview for balanced performance/latency in text/multimodal tasks
@@ -19,7 +19,9 @@ export const generateInterviewQuestions = async (
   fileBase64: string,
   mimeType: string
 ): Promise<Question[]> => {
-  if (!apiKey) throw new Error("API Key is missing");
+  if (!apiKey) {
+    throw new Error("API Key is missing. 환경 변수 설정을 확인해주세요.");
+  }
 
   const ai = new GoogleGenAI({ apiKey });
 
@@ -85,6 +87,7 @@ export const generateInterviewQuestions = async (
         });
     }
 
+    console.log(`Sending request to Gemini (${MODEL_NAME})...`);
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
       contents: { parts },
@@ -112,12 +115,12 @@ export const generateInterviewQuestions = async (
     });
 
     const text = response.text;
-    if (!text) throw new Error("No response from AI");
+    if (!text) throw new Error("No response text from AI");
     
     return JSON.parse(text) as Question[];
 
   } catch (error) {
-    console.error("Error generating questions:", error);
+    console.error("Gemini API Error details:", error);
     throw error;
   }
 };
@@ -127,7 +130,9 @@ export const evaluateInterviewAnswers = async (
   userAnswers: Record<number, string>,
   region: Region
 ): Promise<Record<number, Evaluation>> => {
-  if (!apiKey) throw new Error("API Key is missing");
+  if (!apiKey) {
+    throw new Error("API Key is missing. 환경 변수 설정을 확인해주세요.");
+  }
 
   const ai = new GoogleGenAI({ apiKey });
 

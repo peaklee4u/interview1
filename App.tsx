@@ -32,10 +32,10 @@ const App: React.FC = () => {
   };
 
   const handleFileUpload = async (fileBase64: string, mimeType: string) => {
-    setState((prev) => ({ ...prev, fileData: fileBase64, fileMimeType: mimeType, step: 'generating' }));
+    setState((prev) => ({ ...prev, fileData: fileBase64, fileMimeType: mimeType, step: 'generating', error: null }));
     
     try {
-      if (!state.region) throw new Error("Region not selected");
+      if (!state.region) throw new Error("지역이 선택되지 않았습니다.");
       const questions = await generateInterviewQuestions(state.region, fileBase64, mimeType);
       
       setState((prev) => ({
@@ -44,9 +44,17 @@ const App: React.FC = () => {
         step: 'interview',
         currentQuestionIndex: 0
       }));
-    } catch (error) {
-      console.error(error);
-      setState((prev) => ({ ...prev, step: 'upload', error: "문제 생성 중 오류가 발생했습니다. 다시 시도해주세요." }));
+    } catch (error: any) {
+      console.error("Detailed Error in App.tsx:", error);
+      // 에러 객체에서 구체적인 메시지 추출
+      const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";
+      
+      // 사용자에게 구체적인 원인을 보여줌 (API Key 문제 등)
+      setState((prev) => ({ 
+        ...prev, 
+        step: 'upload', 
+        error: `문제 생성 실패: ${errorMessage}` 
+      }));
     }
   };
 
@@ -59,15 +67,20 @@ const App: React.FC = () => {
     
     // Check if it's the last question
     if (currentQuestionIndex >= questions.length - 1) {
-      setState((prev) => ({ ...prev, userAnswers: nextAnswers, step: 'evaluating' }));
+      setState((prev) => ({ ...prev, userAnswers: nextAnswers, step: 'evaluating', error: null }));
       
       try {
         if (!region) throw new Error("Region is missing");
         const evaluations = await evaluateInterviewAnswers(questions, nextAnswers, region);
         setState((prev) => ({ ...prev, evaluations, step: 'feedback' }));
-      } catch (error) {
-        console.error(error);
-        setState((prev) => ({ ...prev, step: 'interview', error: "평가 중 오류가 발생했습니다." }));
+      } catch (error: any) {
+        console.error("Evaluation Error:", error);
+        const errorMessage = error instanceof Error ? error.message : "평가 중 알 수 없는 오류가 발생했습니다.";
+        setState((prev) => ({ 
+            ...prev, 
+            step: 'interview', 
+            error: `평가 실패: ${errorMessage}` 
+        }));
       }
       
     } else {
@@ -151,11 +164,11 @@ const App: React.FC = () => {
         )}
         
         {state.error && (
-            <div className="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <strong className="font-bold">Error: </strong>
-                <span className="block sm:inline">{state.error}</span>
+            <div className="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded shadow-2xl z-50 max-w-lg" role="alert">
+                <strong className="font-bold block mb-1">오류가 발생했습니다:</strong>
+                <span className="block sm:inline break-words text-sm">{state.error}</span>
                 <span className="absolute top-0 bottom-0 right-0 px-4 py-3" onClick={() => setState(prev => ({...prev, error: null}))}>
-                    <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                    <svg className="fill-current h-6 w-6 text-red-500 cursor-pointer" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
                 </span>
             </div>
         )}
