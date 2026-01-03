@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Question, Evaluation, Region } from "../types";
+import { EXAMPLE_QUESTIONS } from "../data/exampleQuestions";
 
 const apiKey = process.env.API_KEY;
 
@@ -29,16 +30,31 @@ export const generateInterviewQuestions = async (
   };
   const regionName = regionNames[region];
   
+  // 예시 데이터를 문자열로 변환하여 프롬프트에 포함
+  const examplesStr = JSON.stringify(EXAMPLE_QUESTIONS.map(q => ({
+    type: q.type,
+    content: q.content,
+    subQuestions: q.subQuestions
+  })), null, 2);
+
   const systemInstruction = `
     당신은 대한민국 중등교사 임용시험 2차 심층면접 출제위원입니다.
     사용자가 제공한 '${regionName} 교육 기본계획' 문서와 지역 정보를 바탕으로 면접 문항 4개를 출제해야 합니다.
     
+    [참고할 문항 스타일 및 주제 예시]
+    ${examplesStr}
+    
+    위 예시 문항들은 정책(교육방향, 지표), 최신 이슈(AI, 기후위기), 학생 생활지도(모둠활동 갈등, 부적응, 다문화, 인권, 스마트폰) 등 다양한 주제를 다루고 있습니다.
+    이러한 톤앤매너와 구체적인 상황 제시 방식을 적극 반영하여 문제를 출제하세요.
+
     출제 규칙:
     1. 총 4문제를 출제합니다. (구상형 2문제, 즉답형 2문제)
-    2. 구상형 1번: 반드시 업로드된 파일(교육기본계획)의 핵심 정책이나 내용을 인용하여 질문하세요.
-    3. 구상형 2번: 에듀테크, AI 디지털 교과서, 미래 교육 등 최신 교육 트렌드와 관련된 내용을 질문하세요.
-    4. 즉답형 1번 & 2번: 교사로서의 역량, 생활지도, 학급경영, 동료와의 갈등 해결 등 교직적성 문항을 출제하세요. 상황 제시형 질문이 좋습니다.
-    5. 어투는 실제 임용시험 문제처럼 정중하고 명확하게 작성하세요.
+    2. 구상형 1번: 반드시 업로드된 파일(교육기본계획)의 핵심 정책, 비전, 지표 등을 인용하여 질문하세요.
+    3. 구상형 2번: 에듀테크, AI 디지털 교과서, 미래 교육, 혹은 교육청의 특색 사업과 관련된 심도 있는 질문을 하세요.
+    4. 즉답형 1번 & 2번: 
+       - 예시와 같이 구체적인 문제 상황(A, B, C 학생의 대화 등)을 제시하고 해결방안을 묻거나,
+       - 인권, 다문화, 기후위기, 의사소통, 스마트폰 중독 등 학교 현장의 실제적인 이슈를 교사의 자질/역량과 연결하여 질문하세요.
+    5. 어투는 실제 임용시험 문제처럼 정중하고 명확하게 작성하세요. ("~말하시오", "~논하시오")
     6. JSON 형식으로만 출력하세요.
   `;
 
