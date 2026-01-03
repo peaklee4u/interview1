@@ -176,7 +176,7 @@ const App: React.FC = () => {
       
       <footer className="bg-slate-900 text-slate-400 py-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
-            <p className="text-sm">© 2024 Teacher Interview AI. Powered by Google Gemini.</p>
+            <p className="text-sm">© Teacher Interview AI. Powered by Google Gemini.</p>
         </div>
       </footer>
     </div>
