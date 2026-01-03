@@ -27,16 +27,21 @@ const StepFeedback: React.FC<StepFeedbackProps> = ({ questions, userAnswers, eva
           const evaluation = evaluations[question.id];
           const answer = userAnswers[question.id];
 
-          if (!evaluation) return null;
+          // Determine score color safely
+          let scoreColor = 'text-slate-400 bg-slate-50 border-slate-200';
+          let scoreText = '평가 대기';
 
-          // Color coding for numeric score (0-10)
-          let scoreColor = 'text-red-600 bg-red-50 border-red-200';
-          if (evaluation.score >= 9) {
-            scoreColor = 'text-green-600 bg-green-50 border-green-200';
-          } else if (evaluation.score >= 7) {
-            scoreColor = 'text-blue-600 bg-blue-50 border-blue-200';
-          } else if (evaluation.score >= 5) {
-            scoreColor = 'text-yellow-600 bg-yellow-50 border-yellow-200';
+          if (evaluation) {
+            scoreText = `${evaluation.score}점`;
+            if (evaluation.score >= 9) {
+              scoreColor = 'text-green-600 bg-green-50 border-green-200';
+            } else if (evaluation.score >= 7) {
+              scoreColor = 'text-blue-600 bg-blue-50 border-blue-200';
+            } else if (evaluation.score >= 5) {
+              scoreColor = 'text-yellow-600 bg-yellow-50 border-yellow-200';
+            } else {
+              scoreColor = 'text-red-600 bg-red-50 border-red-200';
+            }
           }
 
           return (
@@ -50,7 +55,7 @@ const StepFeedback: React.FC<StepFeedbackProps> = ({ questions, userAnswers, eva
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-400 font-medium">10점 만점</span>
                     <span className={`px-4 py-1 rounded-full text-lg font-bold border ${scoreColor}`}>
-                      {evaluation.score}점
+                      {scoreText}
                     </span>
                   </div>
                 </div>
@@ -72,7 +77,7 @@ const StepFeedback: React.FC<StepFeedbackProps> = ({ questions, userAnswers, eva
                     </span>
                   </h4>
                    <div className="bg-blue-50 p-5 rounded-xl text-slate-700 leading-loose whitespace-pre-wrap border border-blue-100 max-h-[500px] overflow-y-auto custom-scrollbar">
-                    {evaluation.modelAnswer}
+                    {evaluation ? evaluation.modelAnswer : "모범 답안을 생성하지 못했습니다."}
                   </div>
                 </div>
 
@@ -83,7 +88,9 @@ const StepFeedback: React.FC<StepFeedbackProps> = ({ questions, userAnswers, eva
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                       강점 분석
                     </h4>
-                    <p className="text-slate-700 leading-loose bg-white whitespace-pre-wrap">{evaluation.strengths}</p>
+                    <p className="text-slate-700 leading-loose bg-white whitespace-pre-wrap">
+                      {evaluation ? evaluation.strengths : "분석 내용이 없습니다."}
+                    </p>
                   </div>
                   
                   <div className="h-px bg-slate-100 w-full"></div>
@@ -93,7 +100,9 @@ const StepFeedback: React.FC<StepFeedbackProps> = ({ questions, userAnswers, eva
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                       보완점 및 제언
                     </h4>
-                    <p className="text-slate-700 leading-loose whitespace-pre-wrap">{evaluation.improvements}</p>
+                    <p className="text-slate-700 leading-loose whitespace-pre-wrap">
+                      {evaluation ? evaluation.improvements : "분석 내용이 없습니다."}
+                    </p>
                   </div>
                 </div>
               </div>
