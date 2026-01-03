@@ -6,13 +6,12 @@
     <title>중등교사 임용 면접 AI 코칭</title>
     <script>
       // 브라우저 환경에서 process.env 에러 방지 (Blank Screen 해결)
-      window.process = {
-        env: {
-          NODE_ENV: 'production'
-          // 빌드 도구가 없어도 코드가 멈추지 않도록 빈 객체를 제공합니다.
-          // Netlify에서 빌드 시 환경변수가 주입되면 이 값은 덮어씌워지거나 코드에서 대체됩니다.
-        }
-      };
+      // 기존 값을 덮어쓰지 않도록 안전하게 초기화합니다.
+      window.process = window.process || {};
+      window.process.env = window.process.env || {};
+      if (!window.process.env.NODE_ENV) {
+        window.process.env.NODE_ENV = 'production';
+      }
 
       // Tailwind CSS CDN 경고 메시지 숨기기 (콘솔을 깨끗하게 유지하여 진짜 에러 확인 용이)
       if (typeof console !== 'undefined' && console.warn) {
