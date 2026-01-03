@@ -2,17 +2,46 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Question, Evaluation, Region } from "../types";
 import { EXAMPLE_QUESTIONS } from "../data/exampleQuestions";
 
-// Netlify 등 배포 환경에서 프론트엔드에 환경변수를 노출하려면 
-// 보통 VITE_ 또는 REACT_APP_ 접두사가 필요합니다.
-const apiKey = 
-  process.env.VITE_API_KEY || 
-  process.env.REACT_APP_API_KEY || 
-  process.env.API_KEY || 
-  process.env.apiKey;
+// API Key를 안전하게 가져오는 헬퍼 함수
+// 빌드 도구(Vite, Webpack 등)에 따라 가져오는 방식이 다를 수 있어 모든 케이스를 확인합니다.
+const getApiKey = (): string => {
+  let key = '';
 
-// API 키 로드 상태를 콘솔에 출력하여 디버깅을 돕습니다.
+  // 1. Vite 환경 (import.meta.env) 확인
+  try {
+    // @ts-ignore
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      // @ts-ignore
+      key = import.meta.env.VITE_API_KEY || import.meta.env.apiKey || import.meta.env.API_KEY || '';
+    }
+  } catch (e) {
+    // Ignore error if import.meta is not available
+  }
+
+  if (key) return key;
+
+  // 2. Node/Webpack/CRA 환경 (process.env) 확인
+  try {
+    if (typeof process !== 'undefined' && process.env) {
+      key = 
+        process.env.VITE_API_KEY || 
+        process.env.REACT_APP_API_KEY || 
+        process.env.API_KEY || 
+        process.env.apiKey || 
+        '';
+    }
+  } catch (e) {
+    // Ignore error
+  }
+
+  return key;
+};
+
+const apiKey = getApiKey();
+
+// API 키 상태 로깅 (보안을 위해 앞부분만 살짝 보여주거나 길이만 출력)
 if (!apiKey) {
-  console.warn("⚠️ API Key를 찾을 수 없습니다. Netlify 환경변수에 'VITE_API_KEY' 또는 'REACT_APP_API_KEY' 이름으로 키를 추가해 주세요.");
+  console.warn("⚠️ API Key가 감지되지 않았습니다. Netlify 환경변수 설정 후 반드시 '재배포(Trigger Deploy)'를 해주세요.");
 } else {
   console.log("✅ API Key가 로드되었습니다. (Length: " + apiKey.length + ")");
 }
@@ -26,7 +55,7 @@ export const generateInterviewQuestions = async (
   mimeType: string
 ): Promise<Question[]> => {
   if (!apiKey) {
-    throw new Error("API Key is missing. Netlify 환경 변수에서 'VITE_API_KEY'를 설정해주세요.");
+    throw new Error("API Key가 없습니다. Netlify 환경 변수에 'VITE_API_KEY'를 설정하고 '재배포' 했는지 확인해주세요.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
@@ -137,7 +166,7 @@ export const evaluateInterviewAnswers = async (
   region: Region
 ): Promise<Record<number, Evaluation>> => {
   if (!apiKey) {
-    throw new Error("API Key is missing. Netlify 환경 변수에서 'VITE_API_KEY'를 설정해주세요.");
+    throw new Error("API Key가 없습니다. Netlify 환경 변수에 'VITE_API_KEY'를 설정하고 '재배포' 했는지 확인해주세요.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
